@@ -11,7 +11,7 @@ var uiController = (function() {
       return {
         type: document.querySelector(DOMstring.inputType).value,
         description: document.querySelector(DOMstring.inputDescription).value,
-        value: document.querySelector(DOMstring.inputType).value
+        value: document.querySelector(DOMstring.inputValue).value
       };
     },
     getDom: function() {
@@ -21,33 +21,52 @@ var uiController = (function() {
 })();
 // Санхүүтэй ажиллах контроллер
 var financeController = (function() {
-  var Income = function(id, description, value){
+  var Income = function(id, description, value) {
     this.id = id;
     this.description = description;
     this.value = value;
-  }
-  var Expense = function(id, description, value){
+  };
+  var Expense = function(id, description, value) {
     this.id = id;
     this.description = description;
     this.value = value;
-  }
+  };
   var data = {
-    allItems = {
-      incomes: [],
-      expense: [],
+    items: {
+      inc: [],
+      exp: []
     },
-    totals = {
+    totals: {
       totalIncomes: 0,
       totalExpense: 0
     }
-  }
+  };
+  return {
+    addItem: function(type, description, value) {
+      var item, id;
+      if (data.items[type].length === 0) id = 1;
+      else {
+        id = data.items[type][data.items[type].length - 1].id + 1;
+      }
+      if (type === "inc") {
+        item = new Income(id, description, value);
+      } else {
+        item = new Expense(id, description, value);
+      }
+      data.items[type].push(item);
+    },
+    data: function() {
+      return data;
+    }
+  };
 })();
 // Программын холбогч контроллер
 var appController = (function(uiController, finController) {
   var ctrlAddItem = function() {
     // Оруулах өгөгдлийг дэлгэцнээс авах
-    console.log(uiController.getInput());
+    var input = uiController.getInput();
     // Оруулсан өгөгдлийг санхүүгийн хэсэгт хадгална
+    financeController.addItem(input.type, input.description, input.value);
     // Олж авсан өгөгдлүүдээ дэлгэцэн дээр гаргана
     // Төсөв тооцно
     // Эцсийн үлдэгдэл, тооцоог дэлгэцэнд гаргана
@@ -62,13 +81,12 @@ var appController = (function(uiController, finController) {
         ctrlAddItem();
       }
     });
-    return {
-      init = function(){
-        console.log("Application starting ...");
-        setupEventListener();
-      }
-    };
+  };
+  return {
+    init: function() {
+      console.log("Application starting ...");
+      setupEventListener();
+    }
   };
 })(uiController, financeController);
-
-appController.init()
+appController.init();
